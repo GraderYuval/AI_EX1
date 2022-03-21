@@ -2,7 +2,6 @@ from board import Board
 from search import SearchProblem, ucs
 import util
 
-
 class BlokusFillProblem(SearchProblem):
     """
     A one-player Blokus game as a search problem.
@@ -50,7 +49,6 @@ class BlokusFillProblem(SearchProblem):
         return len(actions)
 
 
-
 #####################################################
 # This portion is incomplete.  Time to write code!  #
 #####################################################
@@ -58,6 +56,7 @@ class BlokusCornersProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0)):
         self.expanded = 0
         "*** YOUR CODE HERE ***"
+        self.board = Board(board_w, board_h, 1, piece_list, starting_point)
 
     def get_start_state(self):
         """
@@ -67,7 +66,10 @@ class BlokusCornersProblem(SearchProblem):
 
     def is_goal_state(self, state):
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return state.get_position(0, 0) != -1 \
+               and state.get_position(0, state.board_h - 1) != -1 \
+               and state.get_position(state.board_w - 1, 0) != -1\
+               and state.get_position(state.board_w - 1, state.board_h - 1) != -1
 
     def get_successors(self, state):
         """
@@ -91,7 +93,10 @@ class BlokusCornersProblem(SearchProblem):
         be composed of legal moves
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        cost = 0
+        for action in actions:
+            cost += action.piece.num_tiles
+        return cost
 
 
 def blokus_corners_heuristic(state, problem):
@@ -107,7 +112,13 @@ def blokus_corners_heuristic(state, problem):
     inadmissible or inconsistent heuristics may find optimal solutions, so be careful.
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # l = left, t = top, r = right, b = bottom
+    min_distance_to_lt = min_distance_to_lb = min_distance_to_rt = min_distance_to_rb = -1
+    for x in range(state.board_w):
+        for y in range(state.board_h):
+            if state.get_position(x, y) != -1:
+                min_distance_to_lt = min(min_distance_to_lt, )
+
 
 
 class BlokusCoverProblem(SearchProblem):
@@ -196,7 +207,6 @@ class ClosestLocationSearch:
         util.raiseNotDefined()
 
 
-
 class MiniContestSearch:
     """
     Implement your contest entry here
@@ -215,4 +225,3 @@ class MiniContestSearch:
     def solve(self):
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
-
