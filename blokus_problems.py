@@ -2,6 +2,7 @@ from board import Board
 from search import SearchProblem, ucs
 import util
 
+
 class BlokusFillProblem(SearchProblem):
     """
     A one-player Blokus game as a search problem.
@@ -68,7 +69,7 @@ class BlokusCornersProblem(SearchProblem):
         "*** YOUR CODE HERE ***"
         return state.get_position(0, 0) != -1 \
                and state.get_position(0, state.board_h - 1) != -1 \
-               and state.get_position(state.board_w - 1, 0) != -1\
+               and state.get_position(state.board_w - 1, 0) != -1 \
                and state.get_position(state.board_w - 1, state.board_h - 1) != -1
 
     def get_successors(self, state):
@@ -113,12 +114,15 @@ def blokus_corners_heuristic(state, problem):
     """
     "*** YOUR CODE HERE ***"
     # l = left, t = top, r = right, b = bottom
-    min_distance_to_lt = min_distance_to_lb = min_distance_to_rt = min_distance_to_rb = -1
+    min_distance_to_lt = min_distance_to_lb = min_distance_to_rt = min_distance_to_rb = max(state.board_w, state.board_h)
     for x in range(state.board_w):
         for y in range(state.board_h):
             if state.get_position(x, y) != -1:
-                min_distance_to_lt = min(min_distance_to_lt, )
-
+                min_distance_to_lt = min(min_distance_to_lt, max(x, y))  # from (0,0)
+                min_distance_to_lb = min(min_distance_to_lb, max(x, state.board_h - y))  # from (0,h)
+                min_distance_to_rt = min(min_distance_to_rt, max(state.board_w - x, y))  # from (w,0)
+                min_distance_to_rb = min(min_distance_to_rb, max(state.board_w - x, state.board_h - y))  # from (w,h)
+    return min_distance_to_lt + min_distance_to_lb + min_distance_to_rt + min_distance_to_rb
 
 
 class BlokusCoverProblem(SearchProblem):
