@@ -5,7 +5,6 @@ In search.py, you will implement generic search algorithms
 import util
 
 
-
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -51,15 +50,15 @@ class SearchProblem:
 
 
 class Node:
-    def __init__(self, state, parent=None, action=None, cost=None):
+    def __init__(self, state, parent=None, action=None, cost=0):
         self.state = state
         self.parent = parent
         self.action = action
-        self.cost =  cost
+        self.cost = cost
 
 
 def get_path(final_state_node):
-    path = [final_state_node.action]
+    path = []
     cur_node = final_state_node
     while cur_node.parent is not None:
         path.append(cur_node.action)
@@ -99,12 +98,26 @@ def depth_first_search(problem):
             stack.push(Node(state, parent=cur_state_node, action=action))
     return []  # TODO: check what should be returned when no solution is found
 
+
 def breadth_first_search(problem):
     """
     Search the shallowest nodes in the search tree first.
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    initial_state_node = Node(problem.get_start_state())
+    queue = util.Queue()
+    queue.push(initial_state_node)
+    visited = set()
+    while not queue.isEmpty():
+        cur_state_node = queue.pop()
+        if cur_state_node.state in visited:
+            continue
+        visited.add(cur_state_node.state)
+        if problem.is_goal_state(cur_state_node.state):
+            return get_path(cur_state_node)
+        for state, action, cost in problem.get_successors(cur_state_node.state):
+            queue.push(Node(state, parent=cur_state_node, action=action))
+    return []  # TODO: check what should be returned when no solution is found
 
 
 def uniform_cost_search(problem):
@@ -112,7 +125,7 @@ def uniform_cost_search(problem):
     Search the node of least total cost first.
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return a_star_search(problem, heuristic=null_heuristic)
 
 
 def null_heuristic(state, problem=None):
@@ -128,8 +141,17 @@ def a_star_search(problem, heuristic=null_heuristic):
     Search the node that has the lowest combined cost and heuristic first.
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-
+    initial_state_node = Node(problem.get_start_state())
+    p_quque = util.PriorityQueue()
+    p_quque.push(initial_state_node, 0)
+    while not p_quque.isEmpty():
+        cur_state_node = p_quque.pop()
+        if problem.is_goal_state(cur_state_node.state):
+            return get_path(cur_state_node)
+        for state, action, cost in problem.get_successors(cur_state_node.state):
+            node = Node(state, parent=cur_state_node, action=action, cost=cur_state_node.cost + action.piece.num_tiles)
+            p_quque.push(node, node.cost + heuristic(state))
+    return []  # TODO: check what should be returned when no solution is found
 
 
 # Abbreviations
