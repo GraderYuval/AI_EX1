@@ -150,7 +150,7 @@ def a_star_search(problem, heuristic=null_heuristic):
             return get_path(cur_state_node)
         for state, action, cost in problem.get_successors(cur_state_node.state):
             node = Node(state, parent=cur_state_node, action=action, cost=cur_state_node.cost + action.piece.num_tiles)
-            p_quque.push(node, node.cost + heuristic(state))
+            p_quque.push(node, node.cost + heuristic(state, problem))
     return []  # TODO: check what should be returned when no solution is found
 
 
