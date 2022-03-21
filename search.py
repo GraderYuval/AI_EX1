@@ -55,7 +55,7 @@ class Node:
         self.state = state
         self.parent = parent
         self.action = action
-        self.cost = cost
+        self.cost =  cost
 
 
 def get_path(final_state_node):
