@@ -125,7 +125,7 @@ def uniform_cost_search(problem):
     Search the node of least total cost first.
     """
     "*** YOUR CODE HERE ***"
-    return a_star_search(problem, heuristic=null_heuristic)
+    return astar(problem, heuristic=null_heuristic)
 
 
 def null_heuristic(state, problem=None):

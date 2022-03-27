@@ -1,5 +1,6 @@
 from board import Board
 from search import SearchProblem, ucs
+import numpy as np
 import util
 
 
@@ -114,77 +115,34 @@ def blokus_corners_heuristic(state, problem):
     """
     "*** YOUR CODE HERE ***"
     # l = left, t = top, r = right, b = bottom
-    corners = [(0, 0, 'tl'), (state.board_w - 1, 0, 'tr'), (0, state.board_h - 1, 'bl'), (state.board_w - 1,
-                                                                                         state.board_h - 1, 'br')]
-    sum_min_distances = 0
 
-    x = y = 0
-    for c_x, c_y, c_name in corners:
-        step_size = 1
-        found = False
-        if state.get_position(c_x, c_y) != -1:
-            found = True
-        if c_name == 'tl':
-            while not found:
-                base_x, base_y = c_x, c_y + step_size
-                x, y = base_x, base_y
-                for i in range(step_size + 1):
-                    x = base_x + i
-                    if state.get_position(x, y) != -1:
-                        found = True
-                if not found:
-                    for i in range(1, step_size + 1):
-                        y =  base_y - i
-                        if state.get_position(x, y) != -1:
-                            found = True
-                step_size += 1
+    min_distance_to_lt = min_distance_to_lb = min_distance_to_rt = min_distance_to_rb = max(state.board_w,
+                                                                                            state.board_h)
+    min_distance_to_lt2 = min_distance_to_lb2 = min_distance_to_rt2 = min_distance_to_rb2 = max(state.board_w,
+                                                                                            state.board_h)
+    for x in range(state.board_w):
+        for y in range(state.board_h):
+            if state.get_position(x, y) != -1:
+                min_distance_to_lt = min(min_distance_to_lt, max(x, y))  # from (0,0)
+                min_distance_to_lb = min(min_distance_to_lb, max(x, state.board_h - y))  # from (0,h)
+                min_distance_to_rt = min(min_distance_to_rt, max(state.board_w - x, y))  # from (w,0)
+                min_distance_to_rb = min(min_distance_to_rb, max(state.board_w - x, state.board_h - y))  # from (w,h)
 
-        elif c_name == 'tr':
-            while not found:
-                base_x, base_y = c_x, c_y + step_size
-                x, y = base_x, base_y
-                for i in range(step_size + 1):
-                    x = base_x - i
-                    if state.get_position(x, y) != -1:
-                        found = True
-                if not found:
-                    for i in range(1, step_size + 1):
-                        y = base_y - i
-                        if state.get_position(x, y) != -1:
-                            found = True
-                step_size += 1
+                # min_distance_to_lt2 = min(min_distance_to_lt2, min(x, y))  # from (0,0)
+                # min_distance_to_lb2 = min(min_distance_to_lb2, min(x, state.board_h - y))  # from (0,h)
+                # min_distance_to_rt2 = min(min_distance_to_rt2, min(state.board_w - x, y))  # from (w,0)
+                # min_distance_to_rb2 = min(min_distance_to_rb2, min(state.board_w - x, state.board_h - y))  # from (w,h)
 
-        elif c_name == 'bl':
-            while not found:
-                base_x, base_y = c_x, c_y - step_size
-                x, y = base_x, base_y
-                for i in range(step_size + 1):
-                    x = base_x + i
-                    if state.get_position(x, y) != -1:
-                        found = True
-                if not found:
-                    for i in range(1, step_size + 1):
-                        y = base_y + i
-                        if state.get_position(x, y) != -1:
-                            found = True
-                step_size += 1
-
-        else:  # c_name == 'br':
-            while not found:
-                base_x, base_y = c_x, c_y - step_size
-                x, y = base_x, base_y
-                for i in range(step_size + 1):
-                    x = base_x - i
-                    if state.get_position(x, y) != -1:
-                        found = True
-                if not found:
-                    for i in range(1, step_size + 1):
-                        y = base_y + i
-                        if state.get_position(x, y) != -1:
-                            found = True
-                step_size += 1
-        sum_min_distances += min(abs(x - c_x), abs(y - c_y))
-    return sum_min_distances
+    max_min_dist = max(min_distance_to_lt, min_distance_to_lb, min_distance_to_rt, min_distance_to_rb)
+    return max_min_dist
+    #
+    # mapping = {0: min_distance_to_lt2, 1: min_distance_to_lb2, 2: min_distance_to_rt2, 3: min_distance_to_rb2}
+    #
+    # as_arr = np.asarray([min_distance_to_lt, min_distance_to_lb, min_distance_to_rt, min_distance_to_rb])
+    # arg_max = np.argmax(as_arr)
+    # sum_min_dist = min_distance_to_lt2 + min_distance_to_lb2 + min_distance_to_rt2 + min_distance_to_rb2
+    # sum_min_dist -= mapping[arg_max]
+    # return max_min_dist + sum_min_dist
 
 
 class BlokusCoverProblem(SearchProblem):
@@ -239,6 +197,7 @@ class BlokusCoverProblem(SearchProblem):
 def blokus_cover_heuristic(state, problem):
     "*** YOUR CODE HERE ***"
     # l = left, t = top, r = right, b = bottom
+
     next_direction = {'u': 'l', 'l': 'd', 'd': 'r', 'r': 'u'}
     max_min_distance = 0
     for t_x, t_y in problem.targets:
@@ -268,7 +227,7 @@ def blokus_cover_heuristic(state, problem):
                     step_size += 1
                 cycle_num = 1 - cycle_num
         min_distance_to_target = max(abs(x - t_x), abs(y - t_y))
-        max_min_distance = max(max_min_distance, min_distance_to_target)
+        max_min_distance = min(max_min_distance, min_distance_to_target)
     return max_min_distance
 
 
@@ -288,6 +247,10 @@ class ClosestLocationSearch:
         Returns the start state for the search problem
         """
         return self.board
+
+    def get_closest_target(self):
+        target_idx = 0
+        return target_idx
 
     def solve(self):
         """
@@ -309,7 +272,17 @@ class ClosestLocationSearch:
         return backtrace
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        pass
+        # current_state = self.board.__copy__()
+        # backtrace = []
+        # target_found = np.zeros(len(self.targets))
+        # while 0 in target_found:
+        #     target_idx = self.get_closest_target()
+        #     #find path to target (add actions to backtrace)
+        #     #mark target as visited
+        #     backtrace.extend(actions)
+        #
+        # return backtrace
 
 
 class MiniContestSearch:
