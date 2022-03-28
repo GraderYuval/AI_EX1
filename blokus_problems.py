@@ -1,5 +1,5 @@
 from board import Board
-from search import SearchProblem, ucs
+from search import SearchProblem, ucs, depth_first_search_priority
 import numpy as np
 import util
 
@@ -159,6 +159,9 @@ class BlokusCoverProblem(SearchProblem):
         """
         return self.board
 
+    def set_board(self, board):
+        self.board = board
+
     def is_goal_state(self, state):
         "*** YOUR CODE HERE ***"
         for target in self.targets:
@@ -240,6 +243,8 @@ class ClosestLocationSearch:
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=(0, 0)):
         self.expanded = 0
         self.targets = targets.copy()
+        self.board = Board(board_w, board_h, 1, piece_list, starting_point)
+        self.starting_point = starting_point
         "*** YOUR CODE HERE ***"
 
     def get_start_state(self):
@@ -248,9 +253,36 @@ class ClosestLocationSearch:
         """
         return self.board
 
-    def get_closest_target(self):
-        target_idx = 0
-        return target_idx
+    def distance(self, source_point, target):
+        return max(abs(target[0] - source_point[0]), abs(target[1] - source_point[1]))
+
+    def get_closest_target_idx(self, source_point, target_found):
+        min_target_idx = -1
+        min_distance = float('inf')
+        for target_idx, found in enumerate(target_found):
+            if found:
+                continue
+            distance = self.distance(source_point, self.targets[target_idx])
+            if distance < min_distance:
+                min_distance = distance
+                min_target_idx = target_idx
+        return min_target_idx
+
+    def update_board_connected(self, board_copy, source_point):
+        board_copy.connected = np.full((board_copy.num_players, board_copy.board_h, board_copy.board_w), False,
+                                       np.bool_)
+        source_x, source_y = source_point
+        if source_x + 1 < board_copy.board_w:
+            if source_y + 1 < board_copy.board_h:
+                board_copy.connected[0][source_x + 1, source_y + 1] = True
+            if source_y - 1 >= 0:
+                board_copy.connected[0][source_x + 1, source_y - 1] = True
+        if source_x - 1 >= 0:
+            if source_y + 1 < board_copy.board_h:
+                board_copy.connected[0][source_x - 1, source_y + 1] = True
+            if source_y - 1 >= 0:
+                board_copy.connected[0][source_x - 1, source_y - 1] = True
+
 
     def solve(self):
         """
@@ -272,17 +304,24 @@ class ClosestLocationSearch:
         return backtrace
         """
         "*** YOUR CODE HERE ***"
-        pass
-        # current_state = self.board.__copy__()
-        # backtrace = []
-        # target_found = np.zeros(len(self.targets))
-        # while 0 in target_found:
-        #     target_idx = self.get_closest_target()
-        #     #find path to target (add actions to backtrace)
-        #     #mark target as visited
-        #     backtrace.extend(actions)
-        #
-        # return backtrace
+
+        board_copy = self.board.__copy__()
+        backtrace = []
+        source_point = self.starting_point
+        target_found = np.zeros(len(self.targets))  # boolean array indicating which goal was achieved
+        while 0 in target_found:
+            closest_target_idx = self.get_closest_target_idx(source_point, target_found)
+            closest_target = self.targets[closest_target_idx]
+            problem = BlokusCoverProblem(board_copy.board_w, board_copy.board_h, board_copy.piece_list, source_point, [closest_target])
+            problem.set_board(board_copy)
+            actions = depth_first_search_priority(problem, source_point)
+            target_found[closest_target_idx] = 1
+            source_point = closest_target
+            backtrace.extend(actions)
+            for action in actions:
+                board_copy.add_move(0, action)
+            # self.update_board_connected(board_copy, source_point)
+        return backtrace
 
 
 class MiniContestSearch:
