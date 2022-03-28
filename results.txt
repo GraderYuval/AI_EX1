@@ -9,9 +9,15 @@ Expanded nodes: 66118, score: 13
 
 -p tiny_set_2.txt -f astar -s 6 6 -z corners -H null_heuristic
 Expanded nodes: 37316, score: 17
+Expanded nodes: 36938, score: 17  --after prunninng with min_cost_to_goal
+Expanded nodes: 38047, score: 17  --after adding visited (?)
 
-python3 game.py -p tiny_set_2.txt -f astar -s 6 6 -z corners -H blokus_corners_heuristic
+-p tiny_set_2.txt -f astar -s 6 6 -z corners -H blokus_corners_heuristic
 Expanded nodes: 20120, score: 17
+Expanded nodes: 19852, score: 17
+Expanded nodes: 24088, score: 17 -- after adding visited (?????)
+
+
 
 -p small_set.txt -f astar -s 6 6 -H null_heuristic -z cover -x 3 3 "[(2,2), (5, 5), (1, 4)]"
 Expanded nodes: 4875, score: 7
