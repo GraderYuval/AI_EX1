@@ -140,17 +140,39 @@ def a_star_search(problem, heuristic=null_heuristic):
     """
     Search the node that has the lowest combined cost and heuristic first.
     """
-    "*** YOUR CODE HERE ***"
+    min_cost_to_goal = float("inf")
+    visited_nodes = set()
     initial_state_node = Node(problem.get_start_state())
     p_quque = util.PriorityQueue()
     p_quque.push(initial_state_node, 0)
+
     while not p_quque.isEmpty():
         cur_state_node = p_quque.pop()
+        if cur_state_node in visited_nodes:
+            continue
+
+        visited_nodes.add(cur_state_node)
+
         if problem.is_goal_state(cur_state_node.state):
             return get_path(cur_state_node)
+
         for state, action, cost in problem.get_successors(cur_state_node.state):
-            node = Node(state, parent=cur_state_node, action=action, cost=cur_state_node.cost + action.piece.num_tiles)
-            p_quque.push(node, node.cost + heuristic(state, problem))
+            if state in visited_nodes:
+                continue
+
+            node_cost = cur_state_node.cost + action.piece.num_tiles
+            h_cost = heuristic(state, problem)
+            total_cost = node_cost + h_cost
+
+            if total_cost >= min_cost_to_goal:
+                continue
+
+            if problem.is_goal_state(state):
+                min_cost_to_goal = min(min_cost_to_goal, total_cost)
+
+            node = Node(state, parent=cur_state_node, action=action, cost=node_cost)
+            p_quque.push(node, total_cost)
+
     return []  # TODO: check what should be returned when no solution is found
 
 
