@@ -3,6 +3,7 @@ In search.py, you will implement generic search algorithms
 """
 
 import util
+import numpy as np
 
 
 class SearchProblem:
@@ -99,6 +100,39 @@ def depth_first_search(problem):
     return []  # TODO: check what should be returned when no solution is found
 
 
+def depth_first_search_priority(problem, source_point):
+    initial_state_node = Node(problem.get_start_state())
+    stack = util.Stack()
+    stack.push(initial_state_node)
+    visited = set()
+    source_x, source_y = source_point
+    while not stack.isEmpty():
+        cur_state_node = stack.pop()
+        if cur_state_node.state in visited:
+            continue
+        visited.add(cur_state_node.state)
+        if problem.is_goal_state(cur_state_node.state):
+            return get_path(cur_state_node)
+        successors = problem.get_successors(cur_state_node.state)
+        successors_connected = []
+        successors_disconnected = []
+        for state, action, cost in successors:
+            isolate_piece_board = np.where(state.state == cur_state_node.state.state, -1, 0)
+            touching_points = [(source_x + 1, source_y + 1), (source_x + 1, source_y - 1), (source_x - 1, source_y + 1), (source_x - 1, source_y - 1)]
+            appended = False
+            for x, y in touching_points:
+                    if not appended and isolate_piece_board[x, y]:
+                        successors_connected.append((state, action, cost))
+                        appended = True
+            if not appended:
+                successors_disconnected.append((state, action, cost))
+
+        for state, action, cost in successors_disconnected:
+            stack.push(Node(state, parent=cur_state_node, action=action))
+        for state, action, cost in successors_connected:
+            stack.push(Node(state, parent=cur_state_node, action=action))
+    return []  # TODO: check what should be returned when no solution is found
+
 def breadth_first_search(problem):
     """
     Search the shallowest nodes in the search tree first.
@@ -148,19 +182,17 @@ def a_star_search(problem, heuristic=null_heuristic):
 
     while not p_quque.isEmpty():
         cur_state_node = p_quque.pop()
-        if cur_state_node in visited_nodes:
+        if cur_state_node.state in visited_nodes:
             continue
-
-        visited_nodes.add(cur_state_node)
 
         if problem.is_goal_state(cur_state_node.state):
             return get_path(cur_state_node)
 
-        for state, action, cost in problem.get_successors(cur_state_node.state):
-            if state in visited_nodes:
-                continue
+        visited_nodes.add(cur_state_node.state)
 
-            node_cost = cur_state_node.cost + action.piece.num_tiles
+        for state, action, cost in problem.get_successors(cur_state_node.state):
+
+            node_cost = cur_state_node.cost + cost
             h_cost = heuristic(state, problem)
             total_cost = node_cost + h_cost
 

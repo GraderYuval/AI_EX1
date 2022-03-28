@@ -105,8 +105,7 @@ def play_simple_search(problem, search_func):
         board.add_move(0, action)
         # display.draw_board(board, dots=dots)
     print("Expanded nodes: %d, score: %d" % (problem.expanded, board.score(0)))
-# bfs: 3119, 17
-# dfs: 67, 17
+
 
 def play_a_star_search(problem, heuristic):
     back_trace = astar(problem, heuristic)
