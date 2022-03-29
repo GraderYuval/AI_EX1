@@ -118,13 +118,9 @@ def depth_first_search_priority(problem, source_point):
         successors_disconnected = []
         for state, action, cost in successors:
             isolate_piece_board = np.where(state.state == cur_state_node.state.state, -1, 0)
-            touching_points = [(source_x + 1, source_y + 1), (source_x + 1, source_y - 1), (source_x - 1, source_y + 1), (source_x - 1, source_y - 1)]
-            appended = False
-            for x, y in touching_points:
-                    if not appended and isolate_piece_board[x, y]:
-                        successors_connected.append((state, action, cost))
-                        appended = True
-            if not appended:
+            if isolate_piece_board[source_x, source_y] == 1:
+                successors_connected.append((state, action, cost))
+            else:
                 successors_disconnected.append((state, action, cost))
 
         for state, action, cost in successors_disconnected:

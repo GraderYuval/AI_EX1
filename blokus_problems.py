@@ -309,16 +309,13 @@ class ClosestLocationSearch:
         """
         return self.board
 
-    def distance(self, source_point, target):
-        return max(abs(target[0] - source_point[0]), abs(target[1] - source_point[1]))
-
-    def get_closest_target_idx(self, source_point, target_found):
+    def get_closest_target_idx(self, target_found):
         min_target_idx = -1
         min_distance = float('inf')
         for target_idx, found in enumerate(target_found):
             if found:
                 continue
-            distance = self.distance(source_point, self.targets[target_idx])
+            distance = distance_to_target(self.board, self.targets[target_idx])
             if distance < min_distance:
                 min_distance = distance
                 min_target_idx = target_idx
@@ -362,21 +359,85 @@ class ClosestLocationSearch:
 
         board_copy = self.board.__copy__()
         backtrace = []
-        source_point = self.starting_point
         target_found = np.zeros(len(self.targets))  # boolean array indicating which goal was achieved
+        problem = BlokusCoverProblem(board_copy.board_w, board_copy.board_h, board_copy.piece_list, self.starting_point,
+                                     self.targets)
+        problem.set_board(board_copy)
+
+        totally_forbidden_points = self.get_forbidden_points()
         while 0 in target_found:
-            closest_target_idx = self.get_closest_target_idx(source_point, target_found)
+            closest_target_idx = self.get_closest_target_idx(target_found)
             closest_target = self.targets[closest_target_idx]
-            problem = BlokusCoverProblem(board_copy.board_w, board_copy.board_h, board_copy.piece_list, source_point, [closest_target])
-            problem.set_board(board_copy)
-            actions = depth_first_search_priority(problem, source_point)
+
+            actions = []
+            while board_copy.get_position(closest_target[0], closest_target[1]) == -1:
+                successors = problem.get_successors(board_copy)
+                next_action = self.get_next_action(successors, closest_target, totally_forbidden_points)
+                actions.append(next_action)
+                board_copy.add_move(0, next_action)
+
             target_found[closest_target_idx] = 1
-            source_point = closest_target
             backtrace.extend(actions)
-            for action in actions:
-                board_copy.add_move(0, action)
-            # self.update_board_connected(board_copy, source_point)
+        self.expanded = problem.expanded
         return backtrace
+
+    def legal_state(self, state, totally_forbidden_points):
+        for x, y in totally_forbidden_points:
+            if state.get_position(x, y) != -1:
+                return False
+        return True
+
+    def get_next_action(self, successors, target, totally_forbidden_points):
+        min_distance = float('inf')
+        min_action = None
+        for state, action, cost in successors:
+            distance = distance_to_target(state, target)
+            if distance < min_distance and self.legal_state(state, totally_forbidden_points):
+                min_distance = distance
+                min_action = action
+                if min_distance == 0:
+                    self.legal_state(state, totally_forbidden_points)
+                    break
+        return min_action
+
+    def get_forbidden_points(self):
+        mat = np.zeros((self.board.board_w, self.board.board_h))
+        for x, y in self.targets:
+            for x_pos, y_pos in [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]:
+                if x_pos < 0 or x_pos >= self.board.board_w or y_pos < 0 or y_pos >= self.board.board_h:
+                    continue
+                mat[x_pos, y_pos] += 1
+        # forbidden_points = np.where(mat == 1)
+        totally_forbidden_points = np.where(mat > 1)
+        return list(zip(totally_forbidden_points[0], totally_forbidden_points[1]))
+
+        # return list(zip(forbidden_points[0], forbidden_points[1])), list(zip(totally_forbidden_points[0],
+        #                                                                      totally_forbidden_points[1]))
+
+
+def distance_to_target(board, target):
+    target_x, target_y = target
+    if board.get_position(target_x, target_y) != -1:
+        return 0
+    min_distance = float('inf')
+    for x in range(board.board_w):
+        for y in range(board.board_h):
+            if board.connected[0][x, y] == True:
+                cur_distance = max(abs(x - target_x), abs(y - target_y))
+                min_distance = min(min_distance, cur_distance)
+    return min_distance + 1
+
+# def distance_to_target(board, target, starting_pos):
+#     target_x, target_y = target
+#     if board.get_position(target_x, target_y) != -1:
+#         return 0
+#     min_distance = float('inf')
+#     for x in range(board.board_w):
+#         for y in range(board.board_h):
+#             if board.get_position(x, x) != -1 or (x, y) == starting_pos:
+#                 cur_distance = max(abs(x - target_x), abs(y - target_y))
+#                 min_distance = min(min_distance, cur_distance)
+#     return min_distance
 
 
 class MiniContestSearch:
