@@ -52,10 +52,11 @@ Expanded nodes: 639, score: 8 -- after fixing A star (took 7 minutes)
 
 6.1 A (seen 11 9)
 -p valid_pieces.txt -s 10 10 -z sub-optimal -x 7 7 "[(5,5), (8,8), (4,9)]"
+Expanded nodes: 3, score: 10
 
 6.1 B (seen 23 9)
 -p valid_pieces.txt -s 10 10 -z sub-optimal -x 5 5 "[(3,4), (6,6), (7,5)]"
-
+Expanded nodes: 3, score: 6
 
 
 unknown:
