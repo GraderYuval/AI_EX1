@@ -5,7 +5,6 @@ In search.py, you will implement generic search algorithms
 import util
 import numpy as np
 
-
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement

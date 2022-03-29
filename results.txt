@@ -57,9 +57,3 @@ Expanded nodes: 3, score: 10
 6.1 B (seen 23 9)
 -p valid_pieces.txt -s 10 10 -z sub-optimal -x 5 5 "[(3,4), (6,6), (7,5)]"
 Expanded nodes: 3, score: 6
-
-
-unknown:
-
- -p small_set.txt -f astar -s 10 10 -H blokus_cover_heuristic -z cover -x 3 3 "[(2,2), (5, 5), (6, 7)]"
-Expanded nodes: 788, score: 8

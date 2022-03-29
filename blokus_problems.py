@@ -94,7 +94,6 @@ class BlokusCornersProblem(SearchProblem):
         This method returns the total cost of a particular sequence of actions.  The sequence must
         be composed of legal moves
         """
-        "*** YOUR CODE HERE ***"
         cost = 0
         for action in actions:
             cost += action.piece.num_tiles
