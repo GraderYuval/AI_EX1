@@ -128,25 +128,29 @@ def blokus_corners_heuristic(state, problem):
                 min_distance_to_rt = min(min_distance_to_rt, max(state.board_w - x, y))  # from (w,0)
                 min_distance_to_rb = min(min_distance_to_rb, max(state.board_w - x, state.board_h - y))  # from (w,h)
 
-                # min_distance_to_lt2 = min(min_distance_to_lt2, min(x, y))  # from (0,0)
-                # min_distance_to_lb2 = min(min_distance_to_lb2, min(x, state.board_h - y))  # from (0,h)
-                # min_distance_to_rt2 = min(min_distance_to_rt2, min(state.board_w - x, y))  # from (w,0)
-                # min_distance_to_rb2 = min(min_distance_to_rb2, min(state.board_w - x, state.board_h - y))  # from (w,h)
+                min_distance_to_lt2 = min(min_distance_to_lt2, min(x, y))  # from (0,0)
+                min_distance_to_lb2 = min(min_distance_to_lb2, min(x, state.board_h - y))  # from (0,h)
+                min_distance_to_rt2 = min(min_distance_to_rt2, min(state.board_w - x, y))  # from (w,0)
+                min_distance_to_rb2 = min(min_distance_to_rb2, min(state.board_w - x, state.board_h - y))  # from (w,h)
+
     uncovered_corrners = (0 if state.get_position(0, 0) != -1 else 1) + \
                          (0 if state.get_position(0, state.board_h - 1) != -1 else 1) + \
                          (0 if state.get_position(state.board_w - 1, 0) != -1 else 1) + \
-                         (0 if state.get_position(state.board_w - 1, state.board_h - 1) != -1 else 1)
+                         (0 if state.get_position(state.board_w - 1, state.board_h - 1) != -1 else 1) - 1
 
-    max_min_dist = max(min_distance_to_lt, min_distance_to_lb, min_distance_to_rt, min_distance_to_rb) + (uncovered_corrners - 1)
-    return max_min_dist
-    #
-    # mapping = {0: min_distance_to_lt2, 1: min_distance_to_lb2, 2: min_distance_to_rt2, 3: min_distance_to_rb2}
-    #
-    # as_arr = np.asarray([min_distance_to_lt, min_distance_to_lb, min_distance_to_rt, min_distance_to_rb])
-    # arg_max = np.argmax(as_arr)
-    # sum_min_dist = min_distance_to_lt2 + min_distance_to_lb2 + min_distance_to_rt2 + min_distance_to_rb2
-    # sum_min_dist -= mapping[arg_max]
-    # return max_min_dist + sum_min_dist
+    # max_min_dist = max(min_distance_to_lt, min_distance_to_lb, min_distance_to_rt, min_distance_to_rb) + (uncovered_corrners - 1)
+    max_min_dist = max(min_distance_to_lt, min_distance_to_lb, min_distance_to_rt, min_distance_to_rb)
+    # return max_min_dist
+
+    mapping = {0: min_distance_to_lt2, 1: min_distance_to_lb2, 2: min_distance_to_rt2, 3: min_distance_to_rb2}
+
+    as_arr = np.asarray([min_distance_to_lt, min_distance_to_lb, min_distance_to_rt, min_distance_to_rb])
+    arg_max = np.argmax(as_arr)
+
+    sum_min_dist = min_distance_to_lt2 + min_distance_to_lb2 + min_distance_to_rt2 + min_distance_to_rb2
+    sum_min_dist -= mapping[arg_max]
+    # return max_min_dist + max(sum_min_dist, uncovered_corrners)
+    return max_min_dist + uncovered_corrners
 
 
 class BlokusCoverProblem(SearchProblem):
@@ -275,19 +279,20 @@ def blokus_cover_heuristic(state, problem):
         if max_dist[0] < curr_closest_point_max_dist[0]:
             max_dist = curr_closest_point_max_dist
 
-    source_of_max_edge = curr_closest_point_max_dist[1]
-    target_of_max_edge = curr_closest_point_max_dist[2]
-    max_dist_to_rec = 0
-    targets_out_side_rec = 0
-    for t_x, t_y in problem.targets:
-        if state.get_position(t_x, t_y) == -1:
-            d = dist_to_rec(t_x, t_y, source_of_max_edge[0], source_of_max_edge[1],
-                            target_of_max_edge[0], target_of_max_edge[1])
-            if d > 0:  # target outside rec
-                targets_out_side_rec += 1
-            max_dist_to_rec = max(d, max_dist_to_rec)
+    # source_of_max_edge = curr_closest_point_max_dist[1]
+    # target_of_max_edge = curr_closest_point_max_dist[2]
+    # max_dist_to_rec = 0
+    # targets_out_side_rec = 0
+    # for t_x, t_y in problem.targets:
+    #     if state.get_position(t_x, t_y) == -1:
+    #         d = dist_to_rec(t_x, t_y, source_of_max_edge[0], source_of_max_edge[1],
+    #                         target_of_max_edge[0], target_of_max_edge[1])
+    #         if d > 0:  # target outside rec
+    #             targets_out_side_rec += 1
+    #         max_dist_to_rec = max(d, max_dist_to_rec)
 
-    return max_dist[0] + max(max_dist_to_rec, targets_out_side_rec)
+    # return max_dist[0] + max(max_dist_to_rec, targets_out_side_rec)
+    return max_dist[0]
 
 
 class ClosestLocationSearch:
