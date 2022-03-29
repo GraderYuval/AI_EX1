@@ -119,7 +119,7 @@ def blokus_corners_heuristic(state, problem):
     min_distance_to_lt = min_distance_to_lb = min_distance_to_rt = min_distance_to_rb = max(state.board_w,
                                                                                             state.board_h)
     min_distance_to_lt2 = min_distance_to_lb2 = min_distance_to_rt2 = min_distance_to_rb2 = max(state.board_w,
-                                                                                            state.board_h)
+                                                                                                state.board_h)
     for x in range(state.board_w):
         for y in range(state.board_h):
             if state.get_position(x, y) != -1:
@@ -132,8 +132,12 @@ def blokus_corners_heuristic(state, problem):
                 # min_distance_to_lb2 = min(min_distance_to_lb2, min(x, state.board_h - y))  # from (0,h)
                 # min_distance_to_rt2 = min(min_distance_to_rt2, min(state.board_w - x, y))  # from (w,0)
                 # min_distance_to_rb2 = min(min_distance_to_rb2, min(state.board_w - x, state.board_h - y))  # from (w,h)
+    uncovered_corrners = (0 if state.get_position(0, 0) != -1 else 1) + \
+                         (0 if state.get_position(0, state.board_h - 1) != -1 else 1) + \
+                         (0 if state.get_position(state.board_w - 1, 0) != -1 else 1) + \
+                         (0 if state.get_position(state.board_w - 1, state.board_h - 1) != -1 else 1)
 
-    max_min_dist = max(min_distance_to_lt, min_distance_to_lb, min_distance_to_rt, min_distance_to_rb)
+    max_min_dist = max(min_distance_to_lt, min_distance_to_lb, min_distance_to_rt, min_distance_to_rb) + (uncovered_corrners - 1)
     return max_min_dist
     #
     # mapping = {0: min_distance_to_lt2, 1: min_distance_to_lb2, 2: min_distance_to_rt2, 3: min_distance_to_rb2}
@@ -197,41 +201,93 @@ class BlokusCoverProblem(SearchProblem):
         return cost
 
 
+def dist_to_rec(x, y, s_x, s_y, t_x, t_y):
+    dist_x = 0
+    if s_x <= t_x:  # s_x .... t_x
+        if x > t_x:
+            dist_x = x - t_x
+        if x < s_x:
+            dist_x = s_x - x
+    else:  # t_x .... s_x
+        if x < t_x:
+            dist_x = t_x - x
+        if x > s_x:
+            dist_x = x - s_x
+
+    dist_y = 0
+    if s_y <= t_y:  # s_y .... t_y
+        if y > t_y:
+            dist_y = y - t_y
+        if y < s_y:
+            dist_y = s_y - y
+    else:  # t_y .... s_y
+        if y < t_y:
+            dist_y = t_y - y
+        if y > s_y:
+            dist_y = y - s_y
+
+    return max(dist_x, dist_y)
+
+
 def blokus_cover_heuristic(state, problem):
     "*** YOUR CODE HERE ***"
     # l = left, t = top, r = right, b = bottom
-
-    next_direction = {'u': 'l', 'l': 'd', 'd': 'r', 'r': 'u'}
-    max_min_distance = 0
+    # next_direction = {'u': 'l', 'l': 'd', 'd': 'r', 'r': 'u'}
+    # max_min_distance = 0
+    # for t_x, t_y in problem.targets:
+    #     cycle_num = 0
+    #     direction = 'u'
+    #     step_size = 1
+    #     x, y = t_x, t_y
+    #     found = False
+    #     if state.get_position(x, y) != -1:
+    #         found = True
+    #     while not found:
+    #         base_x, base_y = x, y
+    #         for i in range(1, step_size + 1):
+    #             if direction == 'u':
+    #                 y = base_y - i
+    #             elif direction == 'l':
+    #                 x = base_x - i
+    #             elif direction == 'd':
+    #                 y = base_y + i
+    #             elif direction == 'r':
+    #                 x = base_x + i
+    #             if x >= 0 and x >= state.board_w and y < 0 and y >= state.board_h and state.get_position(x, y) != -1:
+    #                 found = True
+    #         if not found:
+    #             direction = next_direction[direction]
+    #             if cycle_num == 1:
+    #                 step_size += 1
+    #             cycle_num = 1 - cycle_num
+    #     min_distance_to_target = max(abs(x - t_x), abs(y - t_y))
+    #     max_min_distance = min(max_min_distance, min_distance_to_target)
+    # return max_min_distance
+    max_dist = (0, (-1, -1), (-1, -1))
     for t_x, t_y in problem.targets:
-        cycle_num = 0
-        direction = 'u'
-        step_size = 1
-        x, y = t_x, t_y
-        found = False
-        if state.get_position(x, y) != -1:
-            found = True
-        while not found:
-            base_x, base_y = x, y
-            for i in range(1, step_size + 1):
-                if direction == 'u':
-                    y = base_y - i
-                elif direction == 'l':
-                    x = base_x - i
-                elif direction == 'd':
-                    y = base_y + i
-                elif direction == 'r':
-                    x = base_x + i
-                if x >= 0 and x >= state.board_w and y < 0 and y >= state.board_h and state.get_position(x, y) != -1:
-                    found = True
-            if not found:
-                direction = next_direction[direction]
-                if cycle_num == 1:
-                    step_size += 1
-                cycle_num = 1 - cycle_num
-        min_distance_to_target = max(abs(x - t_x), abs(y - t_y))
-        max_min_distance = min(max_min_distance, min_distance_to_target)
-    return max_min_distance
+        curr_closest_point_max_dist = (float('inf'), (-1, -1), (-1, -1))
+        for x in range(state.board_w):
+            for y in range(state.board_h):
+                if state.get_position(x, y) != -1:
+                    long_edge = max(abs(x - t_x), abs(y - t_y))
+                    if long_edge < curr_closest_point_max_dist[0]:
+                        curr_closest_point_max_dist = (long_edge, (x, y), (t_x, t_y))
+        if max_dist[0] < curr_closest_point_max_dist[0]:
+            max_dist = curr_closest_point_max_dist
+
+    source_of_max_edge = curr_closest_point_max_dist[1]
+    target_of_max_edge = curr_closest_point_max_dist[2]
+    max_dist_to_rec = 0
+    targets_out_side_rec = 0
+    for t_x, t_y in problem.targets:
+        if state.get_position(t_x, t_y) == -1:
+            d = dist_to_rec(t_x, t_y, source_of_max_edge[0], source_of_max_edge[1],
+                            target_of_max_edge[0], target_of_max_edge[1])
+            if d > 0:  # target outside rec
+                targets_out_side_rec += 1
+            max_dist_to_rec = max(d, max_dist_to_rec)
+
+    return max_dist[0] + max(max_dist_to_rec, targets_out_side_rec)
 
 
 class ClosestLocationSearch:
@@ -282,7 +338,6 @@ class ClosestLocationSearch:
                 board_copy.connected[0][source_x - 1, source_y + 1] = True
             if source_y - 1 >= 0:
                 board_copy.connected[0][source_x - 1, source_y - 1] = True
-
 
     def solve(self):
         """
