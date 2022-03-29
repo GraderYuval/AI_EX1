@@ -15,7 +15,7 @@ class GameEngine(object):
     """
 
     def __init__(self, inputs, width, height, piece_list):
-        # self.display = GuiDisplay(width, height, title='Intro to AI -- 67842 -- Ex1')
+        self.display = GuiDisplay(width, height, title='Intro to AI -- 67842 -- Ex1')
         self.inputs = inputs
 
         self.piece_list = piece_list
@@ -50,7 +50,7 @@ class GameEngine(object):
             if self.passed[p]:
                 continue
 
-            # self.display.draw_board(self.board)
+            self.display.draw_board(self.board)
             while True:
                 move = self.inputs[p].get_move(p, self.board)
                 if move is None:
@@ -92,7 +92,7 @@ class GameEngine(object):
 
 def play_simple_search(problem, search_func):
     back_trace = search_func(problem)
-    # display = GuiDisplay(problem.board.board_w, problem.board.board_h, title='Intro to AI -- 67842 -- Ex1')
+    display = GuiDisplay(problem.board.board_w, problem.board.board_h, title='Intro to AI -- 67842 -- Ex1')
     board = problem.get_start_state()
     if problem.__class__ == BlokusCornersProblem:
         dots = [(board.board_h - 1, board.board_w - 1), (0, board.board_w - 1), (board.board_h - 1, 0)]
@@ -103,13 +103,13 @@ def play_simple_search(problem, search_func):
             dots = []
     for action in back_trace:
         board.add_move(0, action)
-        # display.draw_board(board, dots=dots)
+        display.draw_board(board, dots=dots)
     print("Expanded nodes: %d, score: %d" % (problem.expanded, board.score(0)))
 
 
 def play_a_star_search(problem, heuristic):
     back_trace = astar(problem, heuristic)
-    # display = GuiDisplay(problem.board.board_w, problem.board.board_h, title='Intro to AI -- 67842 -- Ex1')
+    display = GuiDisplay(problem.board.board_w, problem.board.board_h, title='Intro to AI -- 67842 -- Ex1')
     board = problem.get_start_state()
 
     if problem.__class__ == BlokusCornersProblem:
@@ -122,17 +122,17 @@ def play_a_star_search(problem, heuristic):
 
     for action in back_trace:
         board.add_move(0, action)
-        # display.draw_board(board, dots=dots)
+        display.draw_board(board, dots=dots)
     print("Expanded nodes: %d, score: %d" % (problem.expanded, board.score(0)))
 
 
 def play_approximate_search(problem):
     back_trace = problem.solve()
-    # display = GuiDisplay(problem.board.board_w, problem.board.board_h, title='Intro to AI -- 67842 -- Ex1')
+    display = GuiDisplay(problem.board.board_w, problem.board.board_h, title='Intro to AI -- 67842 -- Ex1')
     board = problem.get_start_state()
     for action in back_trace:
         board.add_move(0, action)
-        # display.draw_board(board, dots=problem.targets)
+        display.draw_board(board, dots=problem.targets)
     print("Expanded nodes: %d, score: %d" % (problem.expanded, board.score(0)))
 
 

@@ -1,37 +1,61 @@
+2.1
 -p tiny_set.txt -s 4 7 -z fill
 Expanded nodes: 67, score: 17
 
+2.2 (**Verified and good result**)
+-p tiny_set.txt -s 4 7 -f bfs -z fill
+Expanded nodes: 3119, score: 17
+
+
+3.1  (**Verified and good result**)
 -p tiny_set_2.txt -f bfs -s 6 6 -z corners
 Expanded nodes: 9286, score: 17
 
+ 3.2 A (seen 2793, 19)
 -p tiny_set_2.txt -f ucs -s 6 6 -z corners
 Expanded nodes: 37316, score: 17
 
+3.2 B (seen 964,13)
 -p small_set.txt -f ucs -s 5 5 -z corners
 Expanded nodes: 66118, score: 13
 
+3.3 (**Verified and good result**)
 -p tiny_set_2.txt -f astar -s 6 6 -z corners -H null_heuristic
 Expanded nodes: 37316, score: 17
 Expanded nodes: 36938, score: 17  --after prunninng with min_cost_to_goal
 Expanded nodes: 38047, score: 17  --after adding visited (?)
 Expanded nodes: 23129, score: 17  --after fixing visited
+Expanded nodes: 21956, score: 17
 
+
+4.1  (seen 9668,4500,88 //All with 17)
 -p tiny_set_2.txt -f astar -s 6 6 -z corners -H blokus_corners_heuristic
 Expanded nodes: 20120, score: 17
 Expanded nodes: 19852, score: 17
 Expanded nodes: 24088, score: 17 -- after adding visited (?????)
 Expanded nodes: 16595, score: 17 -- after fixing visited
+Expanded nodes: 13844, score: 17
+Expanded nodes: 3941, score: 17
 
-
-
+5.1 (seen 6445, 7)
 -p small_set.txt -f astar -s 6 6 -H null_heuristic -z cover -x 3 3 "[(2,2), (5, 5), (1, 4)]"
 Expanded nodes: 4875, score: 7
+Expanded nodes: 4124, score: 7 -- after fixing A-star (**Verified and good result** since seen 6445 res)
 
- -p small_set.txt -f astar -s 6 6 -H blokus_cover_heuristic -z cover -x 3 3 "[(2,2), (5, 5), (1, 4)]"
-Expanded nodes: 6728, score: 8
-
+ 5.2  (seen 552, 8)
  -p small_set.txt -f astar -s 10 10 -H blokus_cover_heuristic -z cover -x 3 3 "[(2,2), (5, 5), (6, 7)]"
 Expanded nodes: 6728, score: 8
+Expanded nodes: 639, score: 8 -- after fixing A star (took 7 minutes)
+Expanded nodes: 6, score: 8 -- Heuristic problem
+Expanded nodes: 15, score: 8 -- Heuristic Fix
+Expanded nodes: 24, score: 8 --  Heuristic Fix (Bas fix?)
+
+6.1 A (seen 11 9)
+-p valid_pieces.txt -s 10 10 -z sub-optimal -x 7 7 "[(5,5), (8,8), (4,9)]"
+
+6.1 B (seen 23 9)
+-p valid_pieces.txt -s 10 10 -z sub-optimal -x 5 5 "[(3,4), (6,6), (7,5)]"
+
 
 
 unknown:

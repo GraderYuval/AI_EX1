@@ -196,11 +196,11 @@ def a_star_search(problem, heuristic=null_heuristic):
             h_cost = heuristic(state, problem)
             total_cost = node_cost + h_cost
 
-            if total_cost >= min_cost_to_goal:
-                continue
+            # if total_cost >= min_cost_to_goal:
+            #     continue
 
-            if problem.is_goal_state(state):
-                min_cost_to_goal = min(min_cost_to_goal, total_cost)
+            # if problem.is_goal_state(state):
+            #     min_cost_to_goal = min(min_cost_to_goal, total_cost)
 
             node = Node(state, parent=cur_state_node, action=action, cost=node_cost)
             p_quque.push(node, total_cost)
