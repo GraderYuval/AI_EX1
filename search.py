@@ -192,8 +192,8 @@ def a_star_search(problem, heuristic=null_heuristic):
             h_cost = heuristic(state, problem)
             total_cost = node_cost + h_cost
 
-            if total_cost >= min_cost_to_goal:
-                continue
+            # if total_cost >= min_cost_to_goal:
+            #     continue
 
             if problem.is_goal_state(state):
                 min_cost_to_goal = min(min_cost_to_goal, total_cost)
