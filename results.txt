@@ -1,11 +1,10 @@
-2.1
+2.1 (**Verified and good result**)
 -p tiny_set.txt -s 4 7 -z fill
 Expanded nodes: 67, score: 17
 
 2.2 (**Verified and good result**)
 -p tiny_set.txt -s 4 7 -f bfs -z fill
 Expanded nodes: 3119, score: 17
-
 
 3.1  (**Verified and good result**)
 -p tiny_set_2.txt -f bfs -s 6 6 -z corners
@@ -49,16 +48,12 @@ Expanded nodes: 639, score: 8 -- after fixing A star (took 7 minutes)
 Expanded nodes: 6, score: 8 -- Heuristic problem
 Expanded nodes: 15, score: 8 -- Heuristic Fix
 Expanded nodes: 24, score: 8 --  Heuristic Fix (Bas fix?)
+Expanded nodes: 639, score: 8 -- after fixing A star (took 7 minutes)
 
 6.1 A (seen 11 9)
 -p valid_pieces.txt -s 10 10 -z sub-optimal -x 7 7 "[(5,5), (8,8), (4,9)]"
+Expanded nodes: 3, score: 10
 
 6.1 B (seen 23 9)
 -p valid_pieces.txt -s 10 10 -z sub-optimal -x 5 5 "[(3,4), (6,6), (7,5)]"
-
-
-
-unknown:
-
- -p small_set.txt -f astar -s 10 10 -H blokus_cover_heuristic -z cover -x 3 3 "[(2,2), (5, 5), (6, 7)]"
-Expanded nodes: 788, score: 8
+Expanded nodes: 3, score: 6

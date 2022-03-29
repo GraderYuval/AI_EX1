@@ -5,7 +5,6 @@ In search.py, you will implement generic search algorithms
 import util
 import numpy as np
 
-
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -154,7 +153,6 @@ def uniform_cost_search(problem):
     """
     Search the node of least total cost first.
     """
-    "*** YOUR CODE HERE ***"
     return astar(problem, heuristic=null_heuristic)
 
 
@@ -187,21 +185,13 @@ def a_star_search(problem, heuristic=null_heuristic):
         visited_nodes.add(cur_state_node.state)
 
         for state, action, cost in problem.get_successors(cur_state_node.state):
-
             node_cost = cur_state_node.cost + cost
             h_cost = heuristic(state, problem)
             total_cost = node_cost + h_cost
-
-            # if total_cost >= min_cost_to_goal:
-            #     continue
-
-            # if problem.is_goal_state(state):
-            #     min_cost_to_goal = min(min_cost_to_goal, total_cost)
-
             node = Node(state, parent=cur_state_node, action=action, cost=node_cost)
             p_quque.push(node, total_cost)
 
-    return []  # TODO: check what should be returned when no solution is found
+    return []
 
 
 # Abbreviations
