@@ -12,11 +12,12 @@ Expanded nodes: 9286, score: 17
 
  3.2 A (seen 2793, 19)
 -p tiny_set_2.txt -f ucs -s 6 6 -z corners
-Expanded nodes: 37316, score: 17
+Expanded nodes: 21956, score: 17
+
 
 3.2 B (seen 964,13)
 -p small_set.txt -f ucs -s 5 5 -z corners
-Expanded nodes: 66118, score: 13
+Expanded nodes: 38781, score: 13
 
 3.3 (**Verified and good result**)
 -p tiny_set_2.txt -f astar -s 6 6 -z corners -H null_heuristic
@@ -35,6 +36,8 @@ Expanded nodes: 24088, score: 17 -- after adding visited (?????)
 Expanded nodes: 16595, score: 17 -- after fixing visited
 Expanded nodes: 13844, score: 17
 Expanded nodes: 3941, score: 17
+Expanded nodes: 2876, score: 17 -- connected distance
+
 
 5.1 (seen 6445, 7)
 -p small_set.txt -f astar -s 6 6 -H null_heuristic -z cover -x 3 3 "[(2,2), (5, 5), (1, 4)]"
@@ -49,6 +52,7 @@ Expanded nodes: 6, score: 8 -- Heuristic problem
 Expanded nodes: 15, score: 8 -- Heuristic Fix
 Expanded nodes: 24, score: 8 --  Heuristic Fix (Bas fix?)
 Expanded nodes: 639, score: 8 -- after fixing A star (took 7 minutes)
+Expanded nodes: 439, score: 8  -- connected distance
 
 6.1 A (seen 11 9)
 -p valid_pieces.txt -s 10 10 -z sub-optimal -x 7 7 "[(5,5), (8,8), (4,9)]"
