@@ -81,8 +81,6 @@ def depth_first_search(problem):
     print("Is the start a goal?", problem.is_goal_state(problem.get_start_state()))
     print("Start's successors:", problem.get_successors(problem.get_start_state()))
     """
-    "*** YOUR CODE HERE ***"
-
     initial_state_node = Node(problem.get_start_state())
     stack = util.Stack()
     stack.push(initial_state_node)
@@ -96,7 +94,7 @@ def depth_first_search(problem):
             return get_path(cur_state_node)
         for state, action, cost in problem.get_successors(cur_state_node.state):
             stack.push(Node(state, parent=cur_state_node, action=action))
-    return []  # TODO: check what should be returned when no solution is found
+    return []
 
 
 def depth_first_search_priority(problem, source_point):
@@ -126,13 +124,12 @@ def depth_first_search_priority(problem, source_point):
             stack.push(Node(state, parent=cur_state_node, action=action))
         for state, action, cost in successors_connected:
             stack.push(Node(state, parent=cur_state_node, action=action))
-    return []  # TODO: check what should be returned when no solution is found
+    return []
 
 def breadth_first_search(problem):
     """
     Search the shallowest nodes in the search tree first.
     """
-    "*** YOUR CODE HERE ***"
     initial_state_node = Node(problem.get_start_state())
     queue = util.Queue()
     queue.push(initial_state_node)
@@ -146,7 +143,7 @@ def breadth_first_search(problem):
             return get_path(cur_state_node)
         for state, action, cost in problem.get_successors(cur_state_node.state):
             queue.push(Node(state, parent=cur_state_node, action=action))
-    return []  # TODO: check what should be returned when no solution is found
+    return []
 
 
 def uniform_cost_search(problem):
@@ -168,7 +165,6 @@ def a_star_search(problem, heuristic=null_heuristic):
     """
     Search the node that has the lowest combined cost and heuristic first.
     """
-    min_cost_to_goal = float("inf")
     visited_nodes = set()
     initial_state_node = Node(problem.get_start_state())
     p_quque = util.PriorityQueue()

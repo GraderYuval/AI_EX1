@@ -1,3 +1,5 @@
+from comtypes import dispid
+
 from board import Board
 from search import SearchProblem, ucs, depth_first_search_priority
 import numpy as np
@@ -57,7 +59,6 @@ class BlokusFillProblem(SearchProblem):
 class BlokusCornersProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0)):
         self.expanded = 0
-        "*** YOUR CODE HERE ***"
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
 
     def get_start_state(self):
@@ -67,7 +68,6 @@ class BlokusCornersProblem(SearchProblem):
         return self.board
 
     def is_goal_state(self, state):
-        "*** YOUR CODE HERE ***"
         return state.get_position(0, 0) != -1 \
                and state.get_position(0, state.board_h - 1) != -1 \
                and state.get_position(state.board_w - 1, 0) != -1 \
@@ -112,43 +112,17 @@ def blokus_corners_heuristic(state, problem):
     your heuristic is *not* consistent, and probably not admissible!  On the other hand,
     inadmissible or inconsistent heuristics may find optimal solutions, so be careful.
     """
-    "*** YOUR CODE HERE ***"
-    # l = left, t = top, r = right, b = bottom
-
-    min_distance_to_lt = min_distance_to_lb = min_distance_to_rt = min_distance_to_rb = max(state.board_w,
-                                                                                            state.board_h)
-    min_distance_to_lt2 = min_distance_to_lb2 = min_distance_to_rt2 = min_distance_to_rb2 = max(state.board_w,
-                                                                                                state.board_h)
-    for x in range(state.board_w):
-        for y in range(state.board_h):
-            if state.get_position(x, y) != -1:
-                min_distance_to_lt = min(min_distance_to_lt, max(x, y))  # from (0,0)
-                min_distance_to_lb = min(min_distance_to_lb, max(x, state.board_h - y))  # from (0,h)
-                min_distance_to_rt = min(min_distance_to_rt, max(state.board_w - x, y))  # from (w,0)
-                min_distance_to_rb = min(min_distance_to_rb, max(state.board_w - x, state.board_h - y))  # from (w,h)
-
-                min_distance_to_lt2 = min(min_distance_to_lt2, min(x, y))  # from (0,0)
-                min_distance_to_lb2 = min(min_distance_to_lb2, min(x, state.board_h - y))  # from (0,h)
-                min_distance_to_rt2 = min(min_distance_to_rt2, min(state.board_w - x, y))  # from (w,0)
-                min_distance_to_rb2 = min(min_distance_to_rb2, min(state.board_w - x, state.board_h - y))  # from (w,h)
+    min_distance_to_lt = distance_to_connected(state, (0, 0))  # from (0,0)
+    min_distance_to_lb = distance_to_connected(state, (0, state.board_h - 1))  # from (0,h)
+    min_distance_to_rt = distance_to_connected(state, (state.board_w - 1, 0))  # from (w,0)
+    min_distance_to_rb = distance_to_connected(state, (state.board_w - 1, state.board_h - 1))  # from (w,h)
 
     uncovered_corrners = (0 if state.get_position(0, 0) != -1 else 1) + \
                          (0 if state.get_position(0, state.board_h - 1) != -1 else 1) + \
                          (0 if state.get_position(state.board_w - 1, 0) != -1 else 1) + \
                          (0 if state.get_position(state.board_w - 1, state.board_h - 1) != -1 else 1) - 1
 
-    # max_min_dist = max(min_distance_to_lt, min_distance_to_lb, min_distance_to_rt, min_distance_to_rb) + (uncovered_corrners - 1)
     max_min_dist = max(min_distance_to_lt, min_distance_to_lb, min_distance_to_rt, min_distance_to_rb)
-    # return max_min_dist
-
-    mapping = {0: min_distance_to_lt2, 1: min_distance_to_lb2, 2: min_distance_to_rt2, 3: min_distance_to_rb2}
-
-    as_arr = np.asarray([min_distance_to_lt, min_distance_to_lb, min_distance_to_rt, min_distance_to_rb])
-    arg_max = np.argmax(as_arr)
-
-    sum_min_dist = min_distance_to_lt2 + min_distance_to_lb2 + min_distance_to_rt2 + min_distance_to_rb2
-    sum_min_dist -= mapping[arg_max]
-    # return max_min_dist + max(sum_min_dist, uncovered_corrners)
     return max_min_dist + uncovered_corrners
 
 
@@ -157,8 +131,6 @@ class BlokusCoverProblem(SearchProblem):
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
         self.targets = targets.copy()
         self.expanded = 0
-
-        "*** YOUR CODE HERE ***"
 
     def get_start_state(self):
         """
@@ -170,7 +142,6 @@ class BlokusCoverProblem(SearchProblem):
         self.board = board
 
     def is_goal_state(self, state):
-        "*** YOUR CODE HERE ***"
         for target in self.targets:
             if state.get_position(target[0], target[1]) == -1:
                 return False
@@ -197,101 +168,20 @@ class BlokusCoverProblem(SearchProblem):
         This method returns the total cost of a particular sequence of actions.  The sequence must
         be composed of legal moves
         """
-        "*** YOUR CODE HERE ***"
         cost = 0
         for action in actions:
             cost += action.piece.num_tiles
         return cost
 
 
-def dist_to_rec(x, y, s_x, s_y, t_x, t_y):
-    dist_x = 0
-    if s_x <= t_x:  # s_x .... t_x
-        if x > t_x:
-            dist_x = x - t_x
-        if x < s_x:
-            dist_x = s_x - x
-    else:  # t_x .... s_x
-        if x < t_x:
-            dist_x = t_x - x
-        if x > s_x:
-            dist_x = x - s_x
-
-    dist_y = 0
-    if s_y <= t_y:  # s_y .... t_y
-        if y > t_y:
-            dist_y = y - t_y
-        if y < s_y:
-            dist_y = s_y - y
-    else:  # t_y .... s_y
-        if y < t_y:
-            dist_y = t_y - y
-        if y > s_y:
-            dist_y = y - s_y
-
-    return max(dist_x, dist_y)
-
-
 def blokus_cover_heuristic(state, problem):
-    "*** YOUR CODE HERE ***"
-    # l = left, t = top, r = right, b = bottom
-    # next_direction = {'u': 'l', 'l': 'd', 'd': 'r', 'r': 'u'}
-    # max_min_distance = 0
-    # for t_x, t_y in problem.targets:
-    #     cycle_num = 0
-    #     direction = 'u'
-    #     step_size = 1
-    #     x, y = t_x, t_y
-    #     found = False
-    #     if state.get_position(x, y) != -1:
-    #         found = True
-    #     while not found:
-    #         base_x, base_y = x, y
-    #         for i in range(1, step_size + 1):
-    #             if direction == 'u':
-    #                 y = base_y - i
-    #             elif direction == 'l':
-    #                 x = base_x - i
-    #             elif direction == 'd':
-    #                 y = base_y + i
-    #             elif direction == 'r':
-    #                 x = base_x + i
-    #             if x >= 0 and x >= state.board_w and y < 0 and y >= state.board_h and state.get_position(x, y) != -1:
-    #                 found = True
-    #         if not found:
-    #             direction = next_direction[direction]
-    #             if cycle_num == 1:
-    #                 step_size += 1
-    #             cycle_num = 1 - cycle_num
-    #     min_distance_to_target = max(abs(x - t_x), abs(y - t_y))
-    #     max_min_distance = min(max_min_distance, min_distance_to_target)
-    # return max_min_distance
-    max_dist = (0, (-1, -1), (-1, -1))
-    for t_x, t_y in problem.targets:
-        curr_closest_point_max_dist = (float('inf'), (-1, -1), (-1, -1))
-        for x in range(state.board_w):
-            for y in range(state.board_h):
-                if state.get_position(x, y) != -1:
-                    long_edge = max(abs(x - t_x), abs(y - t_y))
-                    if long_edge < curr_closest_point_max_dist[0]:
-                        curr_closest_point_max_dist = (long_edge, (x, y), (t_x, t_y))
-        if max_dist[0] < curr_closest_point_max_dist[0]:
+    max_dist = 0
+    for t in problem.targets:
+        curr_closest_point_max_dist = distance_to_connected(state, t)
+        if max_dist < curr_closest_point_max_dist:
             max_dist = curr_closest_point_max_dist
 
-    # source_of_max_edge = curr_closest_point_max_dist[1]
-    # target_of_max_edge = curr_closest_point_max_dist[2]
-    # max_dist_to_rec = 0
-    # targets_out_side_rec = 0
-    # for t_x, t_y in problem.targets:
-    #     if state.get_position(t_x, t_y) == -1:
-    #         d = dist_to_rec(t_x, t_y, source_of_max_edge[0], source_of_max_edge[1],
-    #                         target_of_max_edge[0], target_of_max_edge[1])
-    #         if d > 0:  # target outside rec
-    #             targets_out_side_rec += 1
-    #         max_dist_to_rec = max(d, max_dist_to_rec)
-
-    # return max_dist[0] + max(max_dist_to_rec, targets_out_side_rec)
-    return max_dist[0]
+    return max_dist
 
 
 class ClosestLocationSearch:
@@ -305,7 +195,6 @@ class ClosestLocationSearch:
         self.targets = targets.copy()
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
         self.starting_point = starting_point
-        "*** YOUR CODE HERE ***"
 
     def get_start_state(self):
         """
@@ -319,26 +208,11 @@ class ClosestLocationSearch:
         for target_idx, found in enumerate(target_found):
             if found:
                 continue
-            distance = distance_to_target(self.board, self.targets[target_idx])
+            distance = distance_to_connected(self.board, self.targets[target_idx])
             if distance < min_distance:
                 min_distance = distance
                 min_target_idx = target_idx
         return min_target_idx
-
-    def update_board_connected(self, board_copy, source_point):
-        board_copy.connected = np.full((board_copy.num_players, board_copy.board_h, board_copy.board_w), False,
-                                       np.bool_)
-        source_x, source_y = source_point
-        if source_x + 1 < board_copy.board_w:
-            if source_y + 1 < board_copy.board_h:
-                board_copy.connected[0][source_x + 1, source_y + 1] = True
-            if source_y - 1 >= 0:
-                board_copy.connected[0][source_x + 1, source_y - 1] = True
-        if source_x - 1 >= 0:
-            if source_y + 1 < board_copy.board_h:
-                board_copy.connected[0][source_x - 1, source_y + 1] = True
-            if source_y - 1 >= 0:
-                board_copy.connected[0][source_x - 1, source_y - 1] = True
 
     def solve(self):
         """
@@ -359,8 +233,6 @@ class ClosestLocationSearch:
 
         return backtrace
         """
-        "*** YOUR CODE HERE ***"
-
         board_copy = self.board.__copy__()
         backtrace = []
         target_found = np.zeros(len(self.targets))  # boolean array indicating which goal was achieved
@@ -395,7 +267,7 @@ class ClosestLocationSearch:
         min_distance = float('inf')
         min_action = None
         for state, action, cost in successors:
-            distance = distance_to_target(state, target)
+            distance = distance_to_connected(state, target)
             if distance < min_distance and self.legal_state(state, totally_forbidden_points):
                 min_distance = distance
                 min_action = action
@@ -411,15 +283,11 @@ class ClosestLocationSearch:
                 if x_pos < 0 or x_pos >= self.board.board_w or y_pos < 0 or y_pos >= self.board.board_h:
                     continue
                 mat[x_pos, y_pos] += 1
-        # forbidden_points = np.where(mat == 1)
         totally_forbidden_points = np.where(mat > 1)
         return list(zip(totally_forbidden_points[0], totally_forbidden_points[1]))
 
-        # return list(zip(forbidden_points[0], forbidden_points[1])), list(zip(totally_forbidden_points[0],
-        #                                                                      totally_forbidden_points[1]))
 
-
-def distance_to_target(board, target):
+def distance_to_connected(board, target):
     target_x, target_y = target
     if board.get_position(target_x, target_y) != -1:
         return 0
@@ -431,18 +299,6 @@ def distance_to_target(board, target):
                 min_distance = min(min_distance, cur_distance)
     return min_distance + 1
 
-# def distance_to_target(board, target, starting_pos):
-#     target_x, target_y = target
-#     if board.get_position(target_x, target_y) != -1:
-#         return 0
-#     min_distance = float('inf')
-#     for x in range(board.board_w):
-#         for y in range(board.board_h):
-#             if board.get_position(x, x) != -1 or (x, y) == starting_pos:
-#                 cur_distance = max(abs(x - target_x), abs(y - target_y))
-#                 min_distance = min(min_distance, cur_distance)
-#     return min_distance
-
 
 class MiniContestSearch:
     """
@@ -451,7 +307,6 @@ class MiniContestSearch:
 
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=(0, 0)):
         self.targets = targets.copy()
-        "*** YOUR CODE HERE ***"
 
     def get_start_state(self):
         """
@@ -460,5 +315,4 @@ class MiniContestSearch:
         return self.board
 
     def solve(self):
-        "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
