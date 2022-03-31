@@ -1,5 +1,3 @@
-from comtypes import dispid
-
 from board import Board
 from search import SearchProblem, ucs, depth_first_search_priority
 import numpy as np
