@@ -234,25 +234,20 @@ class ClosestLocationSearch:
         board_copy = self.board.__copy__()
         backtrace = []
         target_found = np.zeros(len(self.targets))  # boolean array indicating which goal was achieved
-        problem = BlokusCoverProblem(board_copy.board_w, board_copy.board_h, board_copy.piece_list, self.starting_point,
-                                     self.targets)
-        problem.set_board(board_copy)
 
-        totally_forbidden_points = self.get_forbidden_points()
         while 0 in target_found:
             closest_target_idx = self.get_closest_target_idx(target_found)
             closest_target = self.targets[closest_target_idx]
+            problem = BlokusCoverProblem(board_copy.board_w, board_copy.board_h, board_copy.piece_list, self.starting_point,
+                                         [closest_target])
+            problem.set_board(board_copy)
+            actions = ucs(problem)
 
-            actions = []
-            while board_copy.get_position(closest_target[0], closest_target[1]) == -1:
-                successors = problem.get_successors(board_copy)
-                next_action = self.get_next_action(successors, closest_target, totally_forbidden_points)
-                actions.append(next_action)
-                board_copy.add_move(0, next_action)
-
-            target_found[closest_target_idx] = 1
             backtrace.extend(actions)
-        self.expanded = problem.expanded
+            for action in actions:
+                board_copy.add_move(0, action)
+            target_found[closest_target_idx] = 1
+            self.expanded += problem.expanded
         return backtrace
 
     def legal_state(self, state, totally_forbidden_points):
